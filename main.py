@@ -89,7 +89,7 @@ class Customer(BaseModel):
     fax: str = None
 
 
-@app.post('/customers/{customer_id}')
+@app.put('/customers/{customer_id}')
 async def update_customer(customer_id, rq: Customer):
     select_customer_query = "SELECT * FROM customers WHERE customerid = ?"
     customer = app.db_connection.execute(select_customer_query, (customer_id,)).fetchone()
@@ -113,14 +113,14 @@ async def update_customer(customer_id, rq: Customer):
 @app.get('/sales')
 async def sales_stats(category):
     app.db_connection.row_factory = sqlite3.Row
-    if category=='customers':
+    if category == 'customers':
         sales_stats = app.db_connection.execute(
             """
                 SELECT
-                    c.customerid, email, phone, inv.sum
+                    c.CustomerId, Email, Phone, inv.Sum
                 FROM customers c 
                 JOIN (
-                    SELECT customerid, ROUND(sum(total), 2) as sum
+                    SELECT customerid, ROUND(sum(total), 2) as Sum
                     FROM invoices
                     GROUP BY customerid) inv
                 ON c.customerid = inv.customerid
@@ -130,7 +130,7 @@ async def sales_stats(category):
     elif category == 'genres':
         sales_stats = app.db_connection.execute(
             """
-                SELECT genres.name, SUM(quantity) AS sum
+                SELECT genres.Name, SUM(quantity) AS Sum
                 FROM invoice_items
                     JOIN tracks ON invoice_items.TrackId = tracks.trackid
                     JOIN genres ON tracks.genreid = genres.genreid
